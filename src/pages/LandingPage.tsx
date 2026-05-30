@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LandingLogo } from '../components/LandingLogo';
-import { Code2, LayoutTemplate, ShieldCheck, ChevronDown } from 'lucide-react';
+import { LayoutTemplate, ShieldCheck, ChevronDown } from 'lucide-react';
 import { Show, UserButton } from '@clerk/react';
 import { LogoIcon } from '../components/LogoIcon';
 import './LandingPage.css';

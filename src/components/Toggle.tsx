@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { type InputHTMLAttributes } from 'react';
 import './Toggle.css';
 
 interface ToggleProps extends InputHTMLAttributes<HTMLInputElement> {}

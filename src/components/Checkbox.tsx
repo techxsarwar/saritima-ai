@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { type InputHTMLAttributes } from 'react';
 import { Check } from 'lucide-react';
 import './Checkbox.css';
 
