@@ -1,0 +1,168 @@
+.auth-layout-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #FAFAFA; /* Light background for the right side */
+}
+
+/* Left side: The Motion Graphic */
+.auth-graphic-side {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: none; /* Hidden on small screens */
+}
+
+@media (min-width: 900px) {
+  .auth-graphic-side {
+    display: block;
+  }
+}
+
+/* 
+  Fluid Gradient Mesh Animation
+  We use a base color and several animated radial gradients to create an organic, blooming feel.
+*/
+.fluid-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #E6E1F9; /* Base soft purple */
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(255, 219, 201, 0.8), transparent 50%), /* Soft peach */
+    radial-gradient(circle at 85% 30%, rgba(212, 196, 251, 0.8), transparent 50%), /* Light lavender */
+    radial-gradient(circle at 50% 80%, rgba(255, 240, 224, 0.8), transparent 50%), /* Warm cream */
+    radial-gradient(circle at 80% 90%, rgba(255, 187, 153, 0.6), transparent 50%); /* Deeper peach */
+  background-size: 200% 200%;
+  animation: gradientFlow 5s ease infinite alternate;
+  filter: blur(20px);
+  transform: scale(1.1); /* Hide blurred edges */
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* 
+  Add a slow rotation layer for more organic complexity 
+*/
+.fluid-gradient-overlay {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(ellipse at 40% 60%, rgba(253, 230, 212, 0.7), transparent 40%),
+    radial-gradient(ellipse at 70% 30%, rgba(235, 224, 255, 0.6), transparent 40%);
+  animation: rotateMesh 10s linear infinite;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+@keyframes rotateMesh {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.auth-graphic-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3rem;
+  z-index: 10;
+}
+
+.auth-graphic-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: #1A1A1A;
+}
+
+.auth-graphic-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.auth-graphic-headline {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  color: #1A1A1A;
+  line-height: 1.2;
+  max-width: 400px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease-out forwards;
+  animation-delay: 0.2s;
+}
+
+.auth-graphic-subheadline {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  color: #4A5568;
+  line-height: 1.5;
+  max-width: 400px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease-out forwards;
+  animation-delay: 0.6s;
+}
+
+.highlight-name {
+  font-weight: 600;
+  color: #2D3748;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Right side: The Auth Form */
+.auth-form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: var(--color-surface);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.02);
+  z-index: 20;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+}

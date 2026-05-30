@@ -1,0 +1,23 @@
+.custom-input {
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.custom-input:focus {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 1px var(--color-focus); /* Creates the exact blue focus ring */
+}
+
+.custom-input::placeholder {
+  color: #999;
+}
+
+.input-full {
+  width: 100%;
+}
