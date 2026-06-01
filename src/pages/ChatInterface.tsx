@@ -46,7 +46,7 @@ export const ChatInterface: React.FC = () => {
   const userName = user?.firstName || (user?.unsafeMetadata?.userName as string) || localStorage.getItem('userName') || 'User';
   const initial = userName.charAt(0).toUpperCase();
 
-  const inputRef = useRef<HTMLInputElement>(null);
+
 
   useEffect(() => {
     if (userId !== 'anonymous') {
