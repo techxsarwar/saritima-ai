@@ -90,10 +90,10 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
+  const handleSend = async (overrideMessage?: string | React.MouseEvent) => {
+    const userText = typeof overrideMessage === 'string' ? overrideMessage : message;
+    if (!userText.trim() || isLoading) return;
     
-    const userText = message;
     const tempId = Date.now().toString();
     const newUserMsg: ChatMessage = {
       id: tempId,
@@ -342,6 +342,11 @@ export const ChatInterface: React.FC = () => {
       <main className="chat-main">
         {/* Header */}
         <header className="chat-header">
+          {!isSidebarOpen && (
+            <button className="icon-button mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(true)} title="Open Sidebar">
+              <Sidebar size={18} />
+            </button>
+          )}
           <div className="plan-badge">
             <span className="plan-name">Free plan</span>
             <span className="plan-separator">·</span>
@@ -373,9 +378,9 @@ export const ChatInterface: React.FC = () => {
               </div>
             </div>
             <div className="home-suggestions">
-              <button className="suggestion-btn">Summarize a document</button>
-              <button className="suggestion-btn">Help me write code</button>
-              <button className="suggestion-btn">Analyze data</button>
+              <button className="suggestion-btn" onClick={() => handleSend("Summarize a document")}>Summarize a document</button>
+              <button className="suggestion-btn" onClick={() => handleSend("Help me write code")}>Help me write code</button>
+              <button className="suggestion-btn" onClick={() => handleSend("Analyze data")}>Analyze data</button>
             </div>
           </div>
         ) : (
