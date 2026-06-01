@@ -36,11 +36,11 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, isLo
     const documentRegex = /<document name="(.*?)">([\s\S]*?)<\/document>/g;
     const imageRegex = /<image_attachment name="([^"]*?)" src="([^"]*?)" \/>/g;
     
-    const parts = [];
+    const parts: Array<{ type: 'text'; content: string } | { type: 'document' | 'image'; index: number; length: number; name: string; data: string }> = [];
     let lastIndex = 0;
     
     // Combine matches from both regexes
-    const allMatches = [];
+    const allMatches: Array<{ type: 'document' | 'image'; index: number; length: number; name: string; data: string }> = [];
     let match;
     
     while ((match = documentRegex.exec(content)) !== null) {

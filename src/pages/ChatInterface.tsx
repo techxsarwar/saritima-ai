@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sidebar, Plus } from 'lucide-react';
+import { Sidebar } from 'lucide-react';
 import { useUser } from '@clerk/react';
 import { supabase } from '../utils/supabase';
 import './ChatInterface.css';
@@ -47,9 +47,6 @@ export const ChatInterface: React.FC = () => {
   const initial = userName.charAt(0).toUpperCase();
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const handleWrapperClick = () => {
-    inputRef.current?.focus();
-  };
 
   useEffect(() => {
     if (userId !== 'anonymous') {
@@ -371,12 +368,7 @@ export const ChatInterface: React.FC = () => {
     setSessions(prev => prev.map(s => s.id === id ? { ...s, title } : s));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+
 
   return (
     <div className="chat-layout">
