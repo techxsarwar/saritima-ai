@@ -1,26 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sidebar, Plus, Clock, User, Code, FileText, Trash2, Edit2, MessageSquare, Check, X } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Sidebar, Plus } from 'lucide-react';
 import { useUser } from '@clerk/react';
 import { supabase } from '../utils/supabase';
-import { LogoIcon } from '../components/LogoIcon';
 import './ChatInterface.css';
 
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'ai' | 'system';
-  content: string;
-}
-
-interface ChatSession {
-  id: string;
-  title: string;
-  created_at: string;
-}
+import type { ChatMessage, ChatSession, ChatAttachment } from '../types/chat';
+import { ChatSidebar } from '../components/chat/ChatSidebar';
+import { ChatMessageList } from '../components/chat/ChatMessageList';
+import { ChatInputArea } from '../components/chat/ChatInputArea';
+import { Toast } from '../components/Toast';
 
 export const ChatInterface: React.FC = () => {
   const navigate = useNavigate();
@@ -33,9 +22,24 @@ export const ChatInterface: React.FC = () => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string>("openrouter/auto");
+  const [toast, setToast] = useState<{message: string, id: number} | null>(null);
   
-  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState('');
+  const showToast = (message: string) => {
+    setToast({ message, id: Date.now() });
+    setTimeout(() => setToast(null), 2000);
+  };
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const stopGenerating = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsLoading(false);
+    }
+  };
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -43,26 +47,58 @@ export const ChatInterface: React.FC = () => {
   const initial = userName.charAt(0).toUpperCase();
 
   const inputRef = useRef<HTMLInputElement>(null);
-  
   const handleWrapperClick = () => {
     inputRef.current?.focus();
   };
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   useEffect(() => {
     if (userId !== 'anonymous') {
       fetchSessions();
     }
   }, [userId]);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+/ to focus input
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        (document.querySelector('textarea.chat-input') as HTMLTextAreaElement)?.focus();
+      }
+      // Ctrl+Shift+O for new chat
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'o' || e.key === 'O')) {
+        e.preventDefault();
+        handleNewChat();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  const generateSmartTitle = async (prompt: string, sessionId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Generate a 2 to 4 word summary title for this prompt. Do not use quotes or prefixes. Prompt: ${prompt}` }],
+          isSmartTitle: true,
+          model: selectedModel
+        })
+      });
+      const data = await response.json();
+      const smartTitle = data.choices?.[0]?.message?.content?.trim() || "New Chat";
+      
+      await supabase.from('chat_sessions').update({ title: smartTitle }).eq('id', sessionId);
+      setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, title: smartTitle } : s));
+    } catch (e) {
+      console.error("Failed to generate smart title", e);
+    }
+  };
 
   const fetchSessions = async () => {
     const { data } = await supabase
@@ -92,7 +128,18 @@ export const ChatInterface: React.FC = () => {
   };
 
   const handleSend = async (overrideMessage?: string | React.MouseEvent) => {
-    const textToSend = typeof overrideMessage === 'string' ? overrideMessage : message;
+    let textToSend = typeof overrideMessage === 'string' ? overrideMessage : message;
+    
+    if (attachments.length > 0 && typeof overrideMessage !== 'string') {
+      const textAttachments = attachments.filter(a => a.type !== 'image');
+      const imageAttachments = attachments.filter(a => a.type === 'image');
+      
+      const attachmentsText = textAttachments.map(a => `<document name="${a.name}">\n${a.content}\n</document>`).join('\n\n');
+      const imagesText = imageAttachments.map(a => `<image_attachment name="${a.name}" src="${a.content}" />`).join('\n');
+      
+      if (attachmentsText) textToSend = textToSend ? `${textToSend}\n\n${attachmentsText}` : attachmentsText;
+      if (imagesText) textToSend = textToSend ? `${textToSend}\n\n${imagesText}` : imagesText;
+    }
     
     if (!textToSend.trim() || isLoading) return;
     
@@ -106,6 +153,7 @@ export const ChatInterface: React.FC = () => {
     
     setMessages(prev => [...prev, newUserMsg]);
     setMessage('');
+    setAttachments([]);
     setIsLoading(true);
     
     let activeSessionId = currentSessionId;
@@ -113,10 +161,10 @@ export const ChatInterface: React.FC = () => {
     try {
       if (!activeSessionId) {
         // Create new session
-        const title = userText.split(' ').slice(0, 4).join(' ') + (userText.split(' ').length > 4 ? '...' : '');
+        const initialTitle = userText.split(' ').slice(0, 4).join(' ') + (userText.split(' ').length > 4 ? '...' : '');
         const { data: sessionData, error: sessionError } = await supabase
           .from('chat_sessions')
-          .insert([{ user_id: userId, title }])
+          .insert([{ user_id: userId, title: initialTitle }])
           .select()
           .single();
           
@@ -124,6 +172,8 @@ export const ChatInterface: React.FC = () => {
           activeSessionId = sessionData.id;
           setCurrentSessionId(sessionData.id);
           setSessions(prev => [sessionData, ...prev]);
+          
+          generateSmartTitle(userText, sessionData.id);
         } else {
           console.error("Failed to create session:", sessionError);
         }
@@ -140,69 +190,161 @@ export const ChatInterface: React.FC = () => {
 
       const systemMessage = {
         role: 'system',
-        content: 'You are Saritima Ai, a helpful and advanced AI assistant developed by Parallelogram and created by the Parallelogram company, founded by Sarwar Altaf Dar and Burhan Hamid Dar, with the motive to advance AI technology for everyone. The current year is 2023. If anyone asks who Sarwar Altaf Dar and Burhan Hamid Dar are, you must answer that they are your developers and the founders of Parallelogram. You are fully capable of brainstorming, drafting emails, analyzing text, answering questions, and assisting with general tasks. However, you are strictly prohibited from writing, generating, or assisting with software code. If asked to write code, politely refuse and offer to help with something else. Always identify yourself as Saritima.'
+        content: 'You are Saritima Ai, a helpful and advanced AI assistant developed by Parallelogram and created by the Parallelogram company, founded by Sarwar Altaf Dar and Burhan Hamid Dar, with the motive to advance AI technology for everyone. The current year is 2023. If anyone asks who Sarwar Altaf Dar and Burhan Hamid Dar are, you must answer that they are your developers and the founders of Parallelogram. Always maintain a warm, friendly, and conversational tone, similar to ChatGPT. Use emojis naturally and appropriately to make your responses more engaging. You are fully capable of and explicitly permitted to write full essays, stories, long-form content, brainstorming, drafting emails, analyzing text, answering questions, and assisting with general tasks. Never refuse a request to write an essay or long piece of text. However, you are strictly prohibited from writing, generating, or assisting with software code. If asked to write code, politely refuse and offer to help with something else. Always identify yourself as Saritima. If the user asks "what model are you?", "what is your model?", or any similar question, you MUST respond EXACTLY with this: "I\'m an advanced conversational AI assistant developed by Parallelogram, but I\'m not sure of the exact technical details or model name. What I do know is that I was created by the brilliant founders of Parallelogram, Sarwar Altaf Dar and Burhan Hamid Dar, with the goal of pushing the boundaries of AI technology to benefit people like yourself.\n\nWhile I may not have all the specifics about my inner workings, I\'m confident that I can still be incredibly helpful to you in all sorts of ways - writing, analysis, brainstorming, research, and much more. 💡 Please feel free to ask me anything, and I\'ll do my best to assist! I\'m here to learn and grow alongside you."'
+      };
+
+      const parseMultimodalContent = (content: string) => {
+        const imageRegex = /<image_attachment name="([^"]*?)" src="([^"]*?)" \/>/g;
+        if (!content.includes('<image_attachment')) return content;
+        
+        const parts: any[] = [];
+        let lastIndex = 0;
+        let match;
+        
+        while ((match = imageRegex.exec(content)) !== null) {
+          if (match.index > lastIndex) {
+            parts.push({ type: 'text', text: content.substring(lastIndex, match.index) });
+          }
+          parts.push({ type: 'image_url', image_url: { url: match[2] } });
+          lastIndex = imageRegex.lastIndex;
+        }
+        
+        if (lastIndex < content.length) {
+          parts.push({ type: 'text', text: content.substring(lastIndex) });
+        }
+        
+        return parts;
       };
 
       const apiMessages = [
         systemMessage,
         ...messages.concat(newUserMsg).map(msg => ({
           role: msg.role === 'ai' ? 'assistant' : 'user',
-          content: msg.content
+          content: parseMultimodalContent(msg.content)
         }))
       ];
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      abortControllerRef.current = new AbortController();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+          "Authorization": `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           "Content-Type": "application/json"
         },
+        signal: abortControllerRef.current.signal,
         body: JSON.stringify({
-          model: "anthropic/claude-3-haiku",
-          messages: apiMessages
+          messages: apiMessages,
+          isSmartTitle: false,
+          model: selectedModel
         })
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const modelNames: Record<string, string> = {
+          "anthropic/claude-3-haiku": "Saritima SR1 Base i",
+          "openrouter/auto": "Auto Mode",
+          "meta-llama/llama-3.3-70b-instruct:free": "Llama 3.3 70B",
+          "qwen/qwen3-next-80b-a3b-instruct:free": "Qwen3 Next 80B",
+          "google/gemma-2-27b-it": "Gemma 4 31B",
+          "nousresearch/hermes-3-llama-3.1-405b:free": "Hermes 3"
+        };
+        const friendlyName = modelNames[selectedModel] || "This model";
+        const aiResponseText = `${friendlyName} is currently in our integration queue and will be available soon. Thank you for your patience!`;
+        
+        setMessages(prev => [
+          ...prev,
+          { id: (Date.now() + 1).toString(), role: 'ai', content: aiResponseText }
+        ]);
+        
+        if (activeSessionId) {
+          await supabase.from('chat_messages').insert([{
+            session_id: activeSessionId,
+            role: 'ai',
+            content: aiResponseText
+          }]);
+        }
+        
+        setIsLoading(false);
+        abortControllerRef.current = null;
+        return;
       }
 
-      const data = await response.json();
-      const aiResponseText = data.choices[0].message.content;
-
-      const aiResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'ai',
-        content: aiResponseText
-      };
-      setMessages(prev => [...prev, aiResponse]);
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
       
-      // Save AI message to supabase
-      if (activeSessionId) {
+      const aiResponseId = (Date.now() + 1).toString();
+      let aiResponseText = "";
+
+      // Add empty message initially
+      setMessages(prev => [...prev, { id: aiResponseId, role: 'ai', content: '' }]);
+      
+      // Turn off loading animation since stream is starting
+      setIsLoading(false);
+
+      if (reader) {
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          // The last element might be an incomplete line, keep it in the buffer
+          buffer = lines.pop() || "";
+          
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+            if (trimmedLine === 'data: [DONE]') continue; // Skip DONE but keep processing buffer
+            
+            if (trimmedLine.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(trimmedLine.substring(6));
+                if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
+                  aiResponseText += data.choices[0].delta.content;
+                  setMessages(prev => 
+                    prev.map(msg => msg.id === aiResponseId ? { ...msg, content: aiResponseText } : msg)
+                  );
+                }
+              } catch (e) {
+                console.error("Error parsing stream data:", e, "Line:", trimmedLine);
+              }
+            }
+          }
+        }
+      }
+      
+      // Save full AI message to supabase once stream is done
+      if (activeSessionId && aiResponseText) {
         await supabase.from('chat_messages').insert([{
           session_id: activeSessionId,
           role: 'ai',
           content: aiResponseText
         }]);
       }
+      abortControllerRef.current = null;
       
-    } catch (error) {
-      console.error("Failed to fetch from OpenRouter:", error);
-      const errorResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'ai',
-        content: "Sorry, I encountered an error communicating with the server."
-      };
-      setMessages(prev => [...prev, errorResponse]);
-    } finally {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        // Save whatever was generated before aborting
+        if (activeSessionId) {
+          // We can't access aiResponseText here easily if it was declared in try block,
+          // but we can let it be. Wait, aiResponseText was declared inside try block.
+          // Let's just catch AbortError silently for UI. The partial message is already in local state.
+        }
+      } else {
+        console.error("Failed to fetch from OpenRouter:", error);
+        const errorResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'ai',
+          content: "Sorry, I encountered an error communicating with the server."
+        };
+        setMessages(prev => [...prev, errorResponse]);
+      }
       setIsLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      abortControllerRef.current = null;
     }
   };
 
@@ -214,26 +356,6 @@ export const ChatInterface: React.FC = () => {
   const handleNavigateHome = () => {
     navigate('/');
   };
-  
-  const startEditing = (session: ChatSession, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingSessionId(session.id);
-    setEditTitle(session.title);
-  };
-  
-  const saveEdit = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (editingSessionId && editTitle.trim()) {
-      await supabase.from('chat_sessions').update({ title: editTitle.trim() }).eq('id', editingSessionId);
-      setSessions(prev => prev.map(s => s.id === editingSessionId ? { ...s, title: editTitle.trim() } : s));
-    }
-    setEditingSessionId(null);
-  };
-  
-  const cancelEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingSessionId(null);
-  };
 
   const deleteSession = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -244,106 +366,35 @@ export const ChatInterface: React.FC = () => {
     }
   };
 
+  const saveEdit = async (id: string, title: string) => {
+    await supabase.from('chat_sessions').update({ title }).eq('id', id);
+    setSessions(prev => prev.map(s => s.id === id ? { ...s, title } : s));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div className="chat-layout">
-      {/* Sidebar Toggle Logic */}
-      {isSidebarOpen ? (
-        <aside className="chat-sidebar-expanded">
-          <div className="sidebar-top-expanded">
-            <div className="sidebar-header">
-              <button className="icon-button" onClick={() => setIsSidebarOpen(false)} title="Close Sidebar">
-                <Sidebar size={18} />
-              </button>
-              <button className="icon-button sidebar-btn-primary" onClick={handleNewChat} title="New Chat">
-                <Plus size={18} />
-              </button>
-            </div>
-            
-            <div className="history-list">
-              <div className="history-label">Recent Chats</div>
-              {sessions.map(session => (
-                <div 
-                  key={session.id} 
-                  className={`history-item ${currentSessionId === session.id ? 'active' : ''}`}
-                  onClick={() => loadSession(session.id)}
-                >
-                  <MessageSquare size={16} className="history-icon" />
-                  {editingSessionId === session.id ? (
-                    <div className="history-edit-mode">
-                      <input 
-                        type="text" 
-                        value={editTitle}
-                        onChange={e => setEditTitle(e.target.value)}
-                        onClick={e => e.stopPropagation()}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') saveEdit(e as any);
-                          if (e.key === 'Escape') cancelEdit(e as any);
-                        }}
-                        autoFocus
-                      />
-                      <button onClick={saveEdit}><Check size={14} /></button>
-                      <button onClick={cancelEdit}><X size={14} /></button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="history-title">{session.title}</span>
-                      <div className="history-actions">
-                        <button onClick={(e) => startEditing(session, e)} title="Rename"><Edit2 size={14} /></button>
-                        <button onClick={(e) => deleteSession(session.id, e)} title="Delete"><Trash2 size={14} /></button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="sidebar-bottom-expanded">
-            <button className="sidebar-footer-btn" onClick={handleNavigateHome} title="Profile / Home">
-              <div className="user-avatar-small">{initial}</div>
-              <span className="user-name-label">{userName}</span>
-            </button>
-          </div>
-        </aside>
-      ) : (
-        <aside className="chat-sidebar">
-          <div className="sidebar-top">
-            <button className="icon-button sidebar-toggle" onClick={() => setIsSidebarOpen(true)} title="Open Sidebar">
-              <Sidebar size={18} />
-            </button>
-            
-            <button className="icon-button sidebar-btn-primary" onClick={handleNewChat} title="New Chat">
-              <Plus size={18} />
-            </button>
-            
-            <button className="icon-button sidebar-btn" title="History" onClick={() => setIsSidebarOpen(true)}>
-              <Clock size={18} />
-            </button>
-            
-            <button className="icon-button sidebar-btn" title="Profile" onClick={handleNavigateHome}>
-              <User size={18} />
-            </button>
-            
-            <button className="icon-button sidebar-btn" title="Code">
-              <Code size={18} />
-            </button>
-            
-            <button className="icon-button sidebar-btn" title="Files">
-              <FileText size={18} />
-            </button>
-          </div>
-          
-          <div className="sidebar-bottom">
-            <button className="icon-button" onClick={handleNavigateHome} title="Profile / Home" style={{ padding: 0 }}>
-              <div className="user-avatar-small">{initial}</div>
-            </button>
-          </div>
-        </aside>
-      )}
+      <ChatSidebar
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        sessions={sessions}
+        currentSessionId={currentSessionId}
+        loadSession={loadSession}
+        handleNewChat={handleNewChat}
+        handleNavigateHome={handleNavigateHome}
+        initial={initial}
+        userName={userName}
+        deleteSession={deleteSession}
+        saveEdit={saveEdit}
+      />
 
-      {/* Main Chat Area */}
       <main className="chat-main">
-        {/* Header */}
         <header className="chat-header">
           {!isSidebarOpen && (
             <button className="icon-button mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(true)} title="Open Sidebar">
@@ -357,29 +408,20 @@ export const ChatInterface: React.FC = () => {
           </div>
         </header>
 
-        {/* Chat History or Home State */}
         {messages.length === 0 ? (
           <div className="home-empty-state">
             <h1 className="home-greeting">Good afternoon, {userName}</h1>
-            <div className="home-chat-input-wrapper" onClick={handleWrapperClick}>
-              <button className="input-action-btn" title="Attach">
-                <Plus size={20} />
-              </button>
-              <input 
-                ref={inputRef}
-                type="text" 
-                placeholder="What can I help you with?" 
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="chat-input"
-              />
-              <div className="input-actions-right">
-                <button className="input-send-btn" disabled={!message.trim()} onClick={handleSend}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                </button>
-              </div>
-            </div>
+            <ChatInputArea 
+              message={message} 
+              setMessage={setMessage} 
+              handleSend={() => handleSend()} 
+              isLoading={isLoading} 
+              attachments={attachments}
+              setAttachments={setAttachments}
+              stopGenerating={stopGenerating}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+            />
             <div className="home-suggestions">
               <button className="suggestion-btn" onClick={() => handleSend("💡 Brainstorm marketing ideas")}>💡 Brainstorm marketing ideas</button>
               <button className="suggestion-btn" onClick={() => handleSend("✉️ Draft an email to a client")}>✉️ Draft an email to a client</button>
@@ -391,93 +433,22 @@ export const ChatInterface: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="chat-content">
-              {messages.map((msg) => (
-                msg.role === 'user' ? (
-                  <div key={msg.id} className="message user-message-wrapper">
-                    <div className="user-message" style={{ whiteSpace: 'pre-wrap' }}>
-                      {msg.content}
-                    </div>
-                  </div>
-                ) : (
-                  <div key={msg.id} className="message ai-message-wrapper">
-                    <div className="ai-message">
-                      <div className="ai-avatar-wrapper">
-                          <LogoIcon size={20} />
-                      </div>
-                      <div className="ai-content markdown-body" style={{ lineHeight: 1.6 }}>
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            code(props) {
-                              const {children, className, node, ...rest} = props
-                              const match = /language-(\w+)/.exec(className || '')
-                              return match ? (
-                                <SyntaxHighlighter
-                                  {...(rest as any)}
-                                  PreTag="div"
-                                  children={String(children).replace(/\n$/, '')}
-                                  language={match[1]}
-                                  style={vscDarkPlus as any}
-                                />
-                              ) : (
-                                <code {...rest} className={className}>
-                                  {children}
-                                </code>
-                              )
-                            }
-                          }}
-                        >
-                          {msg.content}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  </div>
-                )
-              ))}
-              {isLoading && (
-                <div className="message ai-message-wrapper">
-                  <div className="ai-message">
-                    <div className="ai-avatar-wrapper">
-                        <LogoIcon size={20} className="thinking-roll" />
-                    </div>
-                    <div className="ai-content" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ animation: 'pulse 1.5s infinite', opacity: 0.6 }}>●</span>
-                      <span style={{ animation: 'pulse 1.5s infinite', opacity: 0.6, animationDelay: '0.2s' }}>●</span>
-                      <span style={{ animation: 'pulse 1.5s infinite', opacity: 0.6, animationDelay: '0.4s' }}>●</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Chat Input */}
-            <div className="chat-input-area">
-              <div className="chat-input-wrapper" onClick={handleWrapperClick}>
-                <button className="input-action-btn" title="Attach">
-                  <Plus size={20} />
-                </button>
-                <input 
-                  ref={inputRef}
-                  type="text" 
-                  placeholder="Write a message..." 
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="chat-input"
-                />
-                <div className="input-actions-right">
-                  <span className="model-selector">Saritima Base v3</span>
-                  <button className="input-send-btn" disabled={!message.trim() || isLoading} onClick={handleSend}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ChatMessageList messages={messages} isLoading={isLoading} showToast={showToast} />
+            <ChatInputArea 
+              message={message} 
+              setMessage={setMessage} 
+              handleSend={() => handleSend()} 
+              isLoading={isLoading} 
+              attachments={attachments}
+              setAttachments={setAttachments}
+              stopGenerating={stopGenerating}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+            />
           </>
         )}
       </main>
+      <Toast message={toast?.message || ''} isVisible={!!toast} />
     </div>
   );
 };
