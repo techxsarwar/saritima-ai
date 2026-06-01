@@ -43,6 +43,7 @@ export const ChatInterface: React.FC = () => {
   const initial = userName.charAt(0).toUpperCase();
 
   const inputRef = useRef<HTMLInputElement>(null);
+  
   const handleWrapperClick = () => {
     inputRef.current?.focus();
   };
@@ -91,9 +92,11 @@ export const ChatInterface: React.FC = () => {
   };
 
   const handleSend = async (overrideMessage?: string | React.MouseEvent) => {
-    const userText = typeof overrideMessage === 'string' ? overrideMessage : message;
-    if (!userText.trim() || isLoading) return;
+    const textToSend = typeof overrideMessage === 'string' ? overrideMessage : message;
     
+    if (!textToSend.trim() || isLoading) return;
+    
+    const userText = textToSend;
     const tempId = Date.now().toString();
     const newUserMsg: ChatMessage = {
       id: tempId,
@@ -137,7 +140,7 @@ export const ChatInterface: React.FC = () => {
 
       const systemMessage = {
         role: 'system',
-        content: 'You are Saritima Ai, an advanced AI assistant. You cannot write, generate, or assist with writing code. Politely refuse any requests to code. Always identify yourself as Saritima.'
+        content: 'You are Saritima Ai, a helpful and advanced AI assistant. You are fully capable of brainstorming, drafting emails, analyzing text, answering questions, and assisting with general tasks. However, you are strictly prohibited from writing, generating, or assisting with software code. If asked to write code, politely refuse and offer to help with something else. Always identify yourself as Saritima.'
       };
 
       const apiMessages = [
@@ -378,9 +381,12 @@ export const ChatInterface: React.FC = () => {
               </div>
             </div>
             <div className="home-suggestions">
-              <button className="suggestion-btn" onClick={() => handleSend("Summarize a document")}>Summarize a document</button>
-              <button className="suggestion-btn" onClick={() => handleSend("Help me write code")}>Help me write code</button>
-              <button className="suggestion-btn" onClick={() => handleSend("Analyze data")}>Analyze data</button>
+              <button className="suggestion-btn" onClick={() => handleSend("💡 Brainstorm marketing ideas")}>💡 Brainstorm marketing ideas</button>
+              <button className="suggestion-btn" onClick={() => handleSend("✉️ Draft an email to a client")}>✉️ Draft an email to a client</button>
+              <button className="suggestion-btn" onClick={() => handleSend("📝 Summarize my meeting notes")}>📝 Summarize my meeting notes</button>
+              <button className="suggestion-btn" onClick={() => handleSend("📊 Analyze market trends")}>📊 Analyze market trends</button>
+              <button className="suggestion-btn" onClick={() => handleSend("🔍 Research a new topic")}>🔍 Research a new topic</button>
+              <button className="suggestion-btn" onClick={() => handleSend("✨ Polish my writing")}>✨ Polish my writing</button>
             </div>
           </div>
         ) : (

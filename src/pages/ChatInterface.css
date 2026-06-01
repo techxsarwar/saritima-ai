@@ -287,28 +287,26 @@
 }
 
 .ai-content {
-  line-height: 1.6;
+  line-height: 1.7;
   max-width: 100%;
   min-width: 0;
+  font-size: 1rem;
 }
 
-.ai-content h2, .ai-content h3 {
-  font-family: var(--font-serif);
+.ai-content h1, .ai-content h2, .ai-content h3, .ai-content h4 {
+  font-family: inherit;
+  font-weight: 600;
   color: var(--color-text-main);
-  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.ai-content h2 {
-  font-size: 1.5rem;
-}
-
-.ai-content h3 {
-  font-size: 1.25rem;
-  margin-top: 2rem;
-}
+.ai-content h1 { font-size: 1.5rem; }
+.ai-content h2 { font-size: 1.25rem; }
+.ai-content h3 { font-size: 1.15rem; }
 
 .ai-content p {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   font-size: 1rem;
 }
 
@@ -318,14 +316,14 @@
   margin: 2rem 0;
 }
 
-.ai-content ol {
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
+.ai-content ul, .ai-content ol {
+  margin-left: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .ai-content li {
-  margin-bottom: 0.75rem;
-  padding-left: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
 }
 
 .chat-input-area {
@@ -482,14 +480,16 @@
 
 /* Markdown Styles */
 .markdown-body {
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--color-text-main);
   max-width: 100%;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .markdown-body p {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.7;
 }
 
 .markdown-body p:last-child {
