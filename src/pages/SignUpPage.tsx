@@ -9,7 +9,7 @@ export const SignUpPage: React.FC = () => {
         routing="path" 
         path="/sign-up" 
         signInUrl="/sign-in" 
-        forceRedirectUrl="/create-account"
+        forceRedirectUrl="/auth-callback"
         appearance={{
           elements: {
             rootBox: { width: '100%' },

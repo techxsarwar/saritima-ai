@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/Button';
 import { Toggle } from '../components/Toggle';
@@ -8,10 +9,23 @@ import './Onboarding.css'; // Reusing common onboarding styles
 
 export const BeforeFirstChat: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [improve, setImprove] = useState(true);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     localStorage.setItem('hasCompletedOnboarding', 'true');
+    if (user) {
+      try {
+        await user.update({
+          unsafeMetadata: {
+            ...user.unsafeMetadata,
+            hasCompletedOnboarding: true
+          }
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
     navigate('/chat');
   };
 

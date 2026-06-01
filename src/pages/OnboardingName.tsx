@@ -12,9 +12,23 @@ export const OnboardingName: React.FC = () => {
   const email = user?.primaryEmailAddress?.emailAddress || 'noreplyxyvo@gmail.com';
   const [name, setName] = React.useState('');
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (name.trim()) {
       localStorage.setItem('userName', name.trim());
+      if (user) {
+        try {
+          await user.update({
+            firstName: name.trim().split(' ')[0],
+            lastName: name.trim().split(' ').slice(1).join(' ') || undefined,
+            unsafeMetadata: {
+              ...user.unsafeMetadata,
+              userName: name.trim()
+            }
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
     navigate('/onboarding/role');
   };

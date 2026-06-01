@@ -7,6 +7,8 @@ import { BeforeFirstChat } from './pages/BeforeFirstChat';
 import { ChatInterface } from './pages/ChatInterface';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { AuthCallback } from './pages/AuthCallback';
+import { ContentPage } from './pages/ContentPage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/chat" element={<ChatInterface />} />
         <Route path="/sign-in/*" element={<SignInPage />} />
         <Route path="/sign-up/*" element={<SignUpPage />} />
+        <Route path="/auth-callback" element={<AuthCallback />} />
+        <Route path="/info/:category/:pageId" element={<ContentPage />} />
       </Routes>
     </Router>
   );

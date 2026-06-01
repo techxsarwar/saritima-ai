@@ -495,118 +495,13 @@
   font-weight: 400;
 }
 
-/* 5. Dark Mode Fat Footer */
-.fat-footer.dark-mode {
-  background-color: #000000;
-  color: #FFFFFF;
-  padding: 4rem 2rem 2rem;
-  font-family: 'Inter', sans-serif;
-}
 
-.footer-layout {
-  display: flex;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 400px;
-}
 
-.footer-brand-col {
-  flex: 0 0 350px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* Override Logo color for dark mode */
-.footer-logo img {
-  filter: brightness(0) invert(1);
-}
-
-.footer-brand-bottom {
-  margin-top: 4rem;
-}
-
-.by-brand {
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: #A1A1AA;
-  margin-bottom: 0.25rem;
-}
-
-.copyright-text {
-  font-size: 0.75rem;
-  color: #71717A;
-  margin-bottom: 1.5rem;
-}
-
-.social-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-links span {
-  font-size: 0.85rem;
-  color: #A1A1AA;
-  cursor: pointer;
-}
-
-.social-links span:hover {
-  color: #FFFFFF;
-}
-
-.footer-links-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-}
-
-.footer-col {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-}
-
-.link-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.link-group h4 {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #D4D4D8;
-  margin-bottom: 1rem;
-}
-
-.link-group a {
-  text-decoration: none;
-  color: #A1A1AA;
-  font-size: 0.85rem;
-  margin-bottom: 0.75rem;
-  transition: color 0.2s ease;
-}
-
-.link-group a:hover {
-  color: #FFFFFF;
-}
-
-@media (max-width: 1200px) {
-  .footer-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 3rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .footer-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-  }
-}
-
+/* Responsive Design */
 @media (max-width: 1024px) {
+  .landing-header {
+    padding: 1rem 2rem;
+  }
   .hero-headline {
     font-size: 3.5rem;
   }
@@ -614,7 +509,66 @@
     grid-template-columns: 1fr;
     gap: 3rem;
   }
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
   .mockup-sidebar, .mockup-right {
     display: none;
+  }
+  .header-nav {
+    display: none; /* Simplifies nav on tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-header {
+    padding: 1rem 1.5rem;
+  }
+  .header-actions .header-btn.outline {
+    display: none;
+  }
+  .hero-section {
+    padding: 4rem 1.5rem 2rem;
+  }
+  .hero-headline {
+    font-size: 2.5rem;
+  }
+  .hero-subheadline {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  .capabilities-section, .pricing-section, .faq-section {
+    padding: 4rem 1.5rem;
+  }
+  .premium-preview-container {
+    padding: 1.5rem;
+  }
+  .mock-user-msg {
+    font-size: 0.95rem;
+    padding: 1rem;
+  }
+  .ai-body {
+    font-size: 0.95rem;
+  }
+  .pricing-header h2 {
+    font-size: 2.5rem;
+  }
+  .faq-container h2 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-headline {
+    font-size: 2rem;
+  }
+  .cta-button {
+    width: 100%;
+    padding: 1rem;
+  }
+  .header-actions .header-btn.filled {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
 }

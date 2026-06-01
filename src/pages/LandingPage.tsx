@@ -1,16 +1,18 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { LandingLogo } from '../components/LandingLogo';
 import { LayoutTemplate, ShieldCheck, ChevronDown } from 'lucide-react';
-import { Show, UserButton } from '@clerk/react';
+import { Show, UserButton, useUser } from '@clerk/react';
 import { LogoIcon } from '../components/LogoIcon';
+import { Footer } from '../components/Footer';
 import './LandingPage.css';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const handleContinue = () => {
-    const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
+    const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true' || user?.unsafeMetadata?.hasCompletedOnboarding === true;
     if (hasCompletedOnboarding) {
       navigate('/chat');
     } else {
@@ -31,72 +33,72 @@ export const LandingPage: React.FC = () => {
           <div className="nav-item-wrapper">
             <button className="nav-item">Meet Saritima <ChevronDown size={14} strokeWidth={2.5} /></button>
             <div className="dropdown-menu">
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima Code</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima Code for Enterprise</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima Cowork</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Download app</a>
+              <Link to="/info/products/saritima">Saritima</Link>
+              <Link to="/info/products/saritima-code">Saritima Code</Link>
+              <Link to="/info/products/saritima-code-enterprise">Saritima Code for Enterprise</Link>
+              <Link to="/info/products/saritima-cowork">Saritima Cowork</Link>
+              <Link to="/info/products/download-app">Download app</Link>
               <div className="dropdown-divider"></div>
               <h4>Models</h4>
-              <a href="#">Opus</a>
-              <a href="#">Sonnet</a>
-              <a href="#">Standard</a>
+              <Link to="/info/models/opus">Opus</Link>
+              <Link to="/info/models/sonnet">Sonnet</Link>
+              <Link to="/info/models/standard">Standard</Link>
             </div>
           </div>
           <div className="nav-item-wrapper">
             <button className="nav-item">Platform <ChevronDown size={14} strokeWidth={2.5} /></button>
             <div className="dropdown-menu">
-              <a href="#">Overview</a>
-              <a href="#">Developer docs</a>
-              <a href="#">Pricing</a>
-              <a href="#">Marketplace</a>
-              <a href="#">Amazon Bedrock</a>
-              <a href="#">Google Cloud’s Vertex AI</a>
-              <a href="#">Microsoft Foundry</a>
-              <a href="#">Regional compliance</a>
-              <a href="#">Console login</a>
+              <Link to="/info/platform/overview">Overview</Link>
+              <Link to="/info/platform/developer-docs">Developer docs</Link>
+              <Link to="/info/platform/pricing">Pricing</Link>
+              <Link to="/info/platform/marketplace">Marketplace</Link>
+              <Link to="/info/platform/amazon-bedrock">Amazon Bedrock</Link>
+              <Link to="/info/platform/google-cloud-vertex-ai">Google Cloud’s Vertex AI</Link>
+              <Link to="/info/platform/microsoft-foundry">Microsoft Foundry</Link>
+              <Link to="/info/platform/regional-compliance">Regional compliance</Link>
+              <Link to="/info/platform/console-login">Console login</Link>
             </div>
           </div>
           <div className="nav-item-wrapper">
             <button className="nav-item">Solutions <ChevronDown size={14} strokeWidth={2.5} /></button>
             <div className="dropdown-menu">
-              <a href="#">AI agents</a>
-              <a href="#">Code modernization</a>
-              <a href="#">Coding</a>
-              <a href="#">Customer support</a>
-              <a href="#">Education</a>
-              <a href="#">Financial services</a>
-              <a href="#">Government</a>
-              <a href="#">Healthcare</a>
-              <a href="#">Life sciences</a>
-              <a href="#">Nonprofits</a>
-              <a href="#">Security</a>
+              <Link to="/info/solutions/ai-agents">AI agents</Link>
+              <Link to="/info/solutions/code-modernization">Code modernization</Link>
+              <Link to="/info/solutions/coding">Coding</Link>
+              <Link to="/info/solutions/customer-support">Customer support</Link>
+              <Link to="/info/solutions/education">Education</Link>
+              <Link to="/info/solutions/financial-services">Financial services</Link>
+              <Link to="/info/solutions/government">Government</Link>
+              <Link to="/info/solutions/healthcare">Healthcare</Link>
+              <Link to="/info/solutions/life-sciences">Life sciences</Link>
+              <Link to="/info/solutions/nonprofits">Nonprofits</Link>
+              <Link to="/info/solutions/security">Security</Link>
             </div>
           </div>
           <div className="nav-item-wrapper">
             <button className="nav-item">Pricing <ChevronDown size={14} strokeWidth={2.5} /></button>
             <div className="dropdown-menu">
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Pro plan</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Max plan</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Team plan</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Enterprise plan</a>
+              <Link to="/info/products/pro-plan">Pro plan</Link>
+              <Link to="/info/products/max-plan">Max plan</Link>
+              <Link to="/info/products/team-plan">Team plan</Link>
+              <Link to="/info/products/enterprise-plan">Enterprise plan</Link>
               <div className="dropdown-divider"></div>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Pricing overview</a>
+              <Link to="/info/products/pricing">Pricing overview</Link>
             </div>
           </div>
           <div className="nav-item-wrapper">
             <button className="nav-item">Resources <ChevronDown size={14} strokeWidth={2.5} /></button>
             <div className="dropdown-menu">
-              <a href="#">Blog</a>
-              <a href="#">Saritima partner network</a>
-              <a href="#">Connectors</a>
-              <a href="#">Courses</a>
-              <a href="#">Customer stories</a>
-              <a href="#">Engineering at Parellogram</a>
-              <a href="#">Events</a>
-              <a href="#">Plugins</a>
-              <a href="#">Powered by Saritima</a>
-              <a href="#">Service partners</a>
+              <Link to="/info/resources/blog">Blog</Link>
+              <Link to="/info/resources/saritima-partner-network">Saritima partner network</Link>
+              <Link to="/info/resources/connectors">Connectors</Link>
+              <Link to="/info/resources/courses">Courses</Link>
+              <Link to="/info/resources/customer-stories">Customer stories</Link>
+              <Link to="/info/resources/engineering-at-parellogram">Engineering at Parellogram</Link>
+              <Link to="/info/resources/events">Events</Link>
+              <Link to="/info/resources/plugins">Plugins</Link>
+              <Link to="/info/resources/powered-by-saritima">Powered by Saritima</Link>
+              <Link to="/info/resources/service-partners">Service partners</Link>
             </div>
           </div>
         </nav>
@@ -290,160 +292,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. The Footer */}
-      <footer className="fat-footer dark-mode">
-        <div className="footer-layout">
-          {/* Left Side: Brand */}
-          <div className="footer-brand-col">
-            <div className="footer-logo">
-              <LandingLogo />
-            </div>
-            <div className="footer-brand-bottom">
-              <p className="by-brand">BY PARELLOGRAM</p>
-              <p className="copyright-text">© 2026 PARELLOGRAM PBC</p>
-              <div className="social-links">
-                <span>X</span>
-                <span>in</span>
-                <span>YT</span>
-                <span>IG</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side: Links Grid */}
-          <div className="footer-links-grid">
-            {/* Column 1 */}
-            <div className="footer-col">
-              <div className="link-group">
-                <h4>Products</h4>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima Code</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima Code for Enterprise</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Saritima Cowork</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Pro plan</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Max plan</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Team plan</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Enterprise plan</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Download app</a>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Pricing</a>
-                <Show when="signed-out">
-                  <a href="#" onClick={(e) => { e.preventDefault(); navigate('/sign-in'); }}>Log in</a>
-                </Show>
-                <Show when="signed-in">
-                  <a href="#" onClick={(e) => { e.preventDefault(); handleContinue(); }}>Go to App</a>
-                </Show>
-              </div>
-
-              <div className="link-group">
-                <h4>Features</h4>
-                <a href="#">Saritima Security</a>
-                <a href="#">Saritima for Chrome</a>
-                <a href="#">Saritima for Slack</a>
-                <a href="#">Saritima for Excel</a>
-                <a href="#">Saritima for Powerpoint</a>
-                <a href="#">Saritima for Word</a>
-                <a href="#">Skills</a>
-              </div>
-
-              <div className="link-group">
-                <h4>Models</h4>
-                <a href="#">Opus</a>
-                <a href="#">Sonnet</a>
-                <a href="#">Standard</a>
-              </div>
-            </div>
-
-            {/* Column 2 */}
-            <div className="footer-col">
-              <div className="link-group">
-                <h4>Solutions</h4>
-                <a href="#">AI agents</a>
-                <a href="#">Code modernization</a>
-                <a href="#">Coding</a>
-                <a href="#">Customer support</a>
-                <a href="#">Education</a>
-                <a href="#">Financial services</a>
-                <a href="#">Government</a>
-                <a href="#">Healthcare</a>
-                <a href="#">Life sciences</a>
-                <a href="#">Nonprofits</a>
-                <a href="#">Security</a>
-              </div>
-
-              <div className="link-group">
-                <h4>Saritima Platform</h4>
-                <a href="#">Overview</a>
-                <a href="#">Developer docs</a>
-                <a href="#">Pricing</a>
-                <a href="#">Marketplace</a>
-                <a href="#">Amazon Bedrock</a>
-                <a href="#">Google Cloud’s Vertex AI</a>
-                <a href="#">Microsoft Foundry</a>
-                <a href="#">Regional compliance</a>
-                <a href="#">Console login</a>
-              </div>
-            </div>
-
-            {/* Column 3 */}
-            <div className="footer-col">
-              <div className="link-group">
-                <h4>Resources</h4>
-                <a href="#">Blog</a>
-                <a href="#">Saritima partner network</a>
-                <a href="#">Connectors</a>
-                <a href="#">Courses</a>
-                <a href="#">Customer stories</a>
-                <a href="#">Engineering at Parellogram</a>
-                <a href="#">Events</a>
-                <a href="#">Plugins</a>
-                <a href="#">Powered by Saritima</a>
-                <a href="#">Service partners</a>
-              </div>
-
-              <div className="link-group">
-                <h4>Community</h4>
-                <a href="#">Campus Program</a>
-                <a href="#">Startups program</a>
-                <a href="#">Tutorials</a>
-                <a href="#">Use cases</a>
-              </div>
-
-              <div className="link-group">
-                <h4>Company</h4>
-                <a href="#">Parellogram</a>
-                <a href="#">Careers</a>
-                <a href="#">Economic Futures</a>
-                <a href="#">Research</a>
-                <a href="#">Parellogram news</a>
-                <a href="#">Responsible Scaling Policy</a>
-                <a href="#">Security and compliance</a>
-                <a href="#">Transparency</a>
-              </div>
-            </div>
-
-            {/* Column 4 */}
-            <div className="footer-col">
-              <div className="link-group">
-                <h4>Help and security</h4>
-                <a href="#">Availability</a>
-                <a href="#">Status</a>
-                <a href="#">Support center</a>
-              </div>
-
-              <div className="link-group">
-                <h4 style={{ opacity: 0, userSelect: 'none' }}>Legal</h4>
-                <a href="#">Terms and policies</a>
-                <a href="#">Privacy choices</a>
-                <a href="#">Privacy policy</a>
-                <a href="#">Responsible disclosure policy</a>
-                <a href="#">Terms of service: Commercial</a>
-                <a href="#">Terms of service: Consumer</a>
-                <a href="#">Usage policy</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

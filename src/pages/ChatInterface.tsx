@@ -39,7 +39,7 @@ export const ChatInterface: React.FC = () => {
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const userName = localStorage.getItem('userName') || user?.firstName || 'User';
+  const userName = user?.firstName || (user?.unsafeMetadata?.userName as string) || localStorage.getItem('userName') || 'User';
   const initial = userName.charAt(0).toUpperCase();
 
   const inputRef = useRef<HTMLInputElement>(null);
