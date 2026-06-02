@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { LandingPage } from './pages/LandingPage';
-import { CreateAccount } from './pages/CreateAccount';
-import { OnboardingName } from './pages/OnboardingName';
-import { OnboardingRole } from './pages/OnboardingRole';
-import { BeforeFirstChat } from './pages/BeforeFirstChat';
-import { ChatInterface } from './pages/ChatInterface';
-import { SignInPage } from './pages/SignInPage';
-import { SignUpPage } from './pages/SignUpPage';
-import { AuthCallback } from './pages/AuthCallback';
-import { ContentPage } from './pages/ContentPage';
+import { LandingPage } from './pages/main/LandingPage';
+import { CreateAccount } from './pages/auth/CreateAccount';
+import { OnboardingName } from './pages/onboarding/OnboardingName';
+import { OnboardingRole } from './pages/onboarding/OnboardingRole';
+import { BeforeFirstChat } from './pages/onboarding/BeforeFirstChat';
+import { ChatInterface } from './pages/main/ChatInterface';
+import { SignInPage } from './pages/auth/SignInPage';
+import { SignUpPage } from './pages/auth/SignUpPage';
+import { AuthCallback } from './pages/auth/AuthCallback';
+import { ContentPage } from './pages/main/ContentPage';
 
 function App() {
   return (

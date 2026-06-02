@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/react';
-import { Logo } from '../components/Logo';
-import { Checkbox } from '../components/Checkbox';
-import { Button } from '../components/Button';
+import { Logo } from '../../components/icons/Logo';
+import { Checkbox } from '../../components/ui/Checkbox';
+import { Button } from '../../components/ui/Button';
 
 export const CreateAccount: React.FC = () => {
   const navigate = useNavigate();

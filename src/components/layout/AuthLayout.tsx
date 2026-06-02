@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogoIcon } from './LogoIcon';
+import { LogoIcon } from '../icons/LogoIcon';
 import './AuthLayout.css';
 
 interface AuthLayoutProps {

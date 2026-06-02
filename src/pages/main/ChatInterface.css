@@ -638,7 +638,7 @@
     padding: 0.5rem;
   }
   
-  .model-selector {
+  .model-selector-wrapper {
     display: none; /* Hide on mobile to save space for input */
   }
 }

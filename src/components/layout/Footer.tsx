@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Show, useUser } from '@clerk/react';
-import { LandingLogo } from './LandingLogo';
+import { LandingLogo } from '../icons/LandingLogo';
 import './Footer.css';
 
 export const Footer: React.FC = () => {

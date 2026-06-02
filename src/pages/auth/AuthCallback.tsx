@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/react';
-import { LogoIcon } from '../components/LogoIcon';
+import { LogoIcon } from '../../components/icons/LogoIcon';
 
 export const AuthCallback: React.FC = () => {
   const { user, isLoaded } = useUser();

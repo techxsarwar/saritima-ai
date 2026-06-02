@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LandingLogo } from '../components/LandingLogo';
+import { LandingLogo } from '../../components/icons/LandingLogo';
 import { LayoutTemplate, ShieldCheck, ChevronDown } from 'lucide-react';
 import { Show, UserButton, useUser } from '@clerk/react';
-import { LogoIcon } from '../components/LogoIcon';
-import { Footer } from '../components/Footer';
+import { LogoIcon } from '../../components/icons/LogoIcon';
+import { Footer } from '../../components/layout/Footer';
 import './LandingPage.css';
 
 export const LandingPage: React.FC = () => {

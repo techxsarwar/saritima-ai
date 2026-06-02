@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from 'lucide-react';
 import { useUser } from '@clerk/react';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../../utils/supabase';
 import './ChatInterface.css';
 
-import type { ChatMessage, ChatSession, ChatAttachment } from '../types/chat';
-import { ChatSidebar } from '../components/chat/ChatSidebar';
-import { ChatMessageList } from '../components/chat/ChatMessageList';
-import { ChatInputArea } from '../components/chat/ChatInputArea';
-import { Toast } from '../components/Toast';
+import type { ChatMessage, ChatSession, ChatAttachment } from '../../types/chat';
+import { ChatSidebar } from '../../components/chat/ChatSidebar';
+import { ChatMessageList } from '../../components/chat/ChatMessageList';
+import { ChatInputArea } from '../../components/chat/ChatInputArea';
+import { Toast } from '../../components/ui/Toast';
 
 export const ChatInterface: React.FC = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export const ChatInterface: React.FC = () => {
     }
   };
   
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
 
   const userName = user?.firstName || (user?.unsafeMetadata?.userName as string) || localStorage.getItem('userName') || 'User';
   const initial = userName.charAt(0).toUpperCase();
@@ -78,7 +78,7 @@ export const ChatInterface: React.FC = () => {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          "Authorization": `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -227,7 +227,7 @@ export const ChatInterface: React.FC = () => {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          "Authorization": `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           "Content-Type": "application/json"
         },
         signal: abortControllerRef.current.signal,
@@ -239,6 +239,10 @@ export const ChatInterface: React.FC = () => {
       });
 
       if (!response.ok) {
+        let errText = "";
+        try { errText = await response.text(); } catch(e) {}
+        console.error("Chat API Error Status:", response.status, "Error Text:", errText);
+        
         const modelNames: Record<string, string> = {
           "anthropic/claude-3-haiku": "Saritima SR1 Base i",
           "openrouter/auto": "Auto Mode",

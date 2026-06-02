@@ -29,7 +29,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: model || "liquid/lfm-2.5-1.2b-thinking:free",
+        model: model || "openrouter/auto",
         messages: messages,
         stream: !isSmartTitle, 
       }),

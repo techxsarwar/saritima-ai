@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/react';
-import { Logo } from '../components/Logo';
-import { Button } from '../components/Button';
-import { Toggle } from '../components/Toggle';
+import { Logo } from '../../components/icons/Logo';
+import { Button } from '../../components/ui/Button';
+import { Toggle } from '../../components/ui/Toggle';
 import { EyeOff, Shield } from 'lucide-react';
 import './Onboarding.css'; // Reusing common onboarding styles
 

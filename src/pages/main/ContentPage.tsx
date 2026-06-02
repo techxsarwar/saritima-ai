@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import { footerContent } from '../data/footerContent';
-import { LandingLogo } from '../components/LandingLogo';
-import { Footer } from '../components/Footer';
+import { footerContent } from '../../data/footerContent';
+import { LandingLogo } from '../../components/icons/LandingLogo';
+import { Footer } from '../../components/layout/Footer';
 import { ArrowLeft } from 'lucide-react';
 import './ContentPage.css';
 

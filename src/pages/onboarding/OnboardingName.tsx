@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/react';
-import { Logo } from '../components/Logo';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
+import { Logo } from '../../components/icons/Logo';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 import './Onboarding.css';
 
 export const OnboardingName: React.FC = () => {

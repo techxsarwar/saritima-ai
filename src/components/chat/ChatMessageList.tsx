@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check, FileText } from 'lucide-react';
 import type { ChatMessage } from '../../types/chat';
-import { LogoIcon } from '../LogoIcon';
+import { LogoIcon } from '../icons/LogoIcon';
 
 interface ChatMessageListProps {
   messages: ChatMessage[];

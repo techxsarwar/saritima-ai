@@ -1,6 +1,6 @@
 import React from 'react';
 import { SignUp } from '@clerk/react';
-import { AuthLayout } from '../components/AuthLayout';
+import { AuthLayout } from '../../components/layout/AuthLayout';
 
 export const SignUpPage: React.FC = () => {
   return (

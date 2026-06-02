@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Logo } from '../components/Logo';
-import { Select } from '../components/Select';
+import { Logo } from '../../components/icons/Logo';
+import { Select } from '../../components/ui/Select';
 import './Onboarding.css';
 
 export const OnboardingRole: React.FC = () => {
