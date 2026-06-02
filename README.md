@@ -1,8 +1,3 @@
-
-
-# 🔥 The Ultimate Saritima AI README
-
-```markdown
 <div align="center">
 
 <img src="public/favicon.svg" alt="Saritima AI" width="140" height="140" />
@@ -375,7 +370,6 @@ See [LICENSE](LICENSE) for full text.
 **Saritima AI** · 🌊 *The Ocean of Intelligence*
 
 </div>
-```
 
 ## What makes this version 10x stronger:
 
