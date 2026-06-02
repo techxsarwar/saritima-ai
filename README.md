@@ -251,7 +251,7 @@ docker compose up --build
 | | |
 |---|---|
 | 🔗 **Production** | [https://saritima.techxsarwar.dev](https://saritima.techxsarwar.dev) *(coming soon)* |
-| 🧪 **Preview** | [https://staging.saritima.vercel.app](https://staging.saritima.vercel.app) |
+| 🧪 **Preview** | [https://saritima-ai.vercel.app](https://saritima-ai.vercel.app) |
 | 📺 **Screencast** | [YouTube Walkthrough](https://youtube.com/watch?v=xxxx) *(coming)* |
 
 ---
